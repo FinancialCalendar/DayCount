@@ -122,6 +122,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     if (events.length > 0) {
                         const eventDiv = document.createElement('div');
                         eventDiv.className = 'event-text';
+                        // Store the original events data
+                        eventDiv.dataset.originalEvents = JSON.stringify(events);
                         
                         if (events.length >= 3) {
                             // Create dot
@@ -403,52 +405,62 @@ document.addEventListener('DOMContentLoaded', () => {
                         checkbox.checked = isChecked;
                     }
                 });
-            } else {
-                // Handle country checkbox change
-                const countryCode = e.target.id.replace('holiday-', '');
-                const region = e.target.dataset.region;
-                
-                // Update region checkbox if needed
-                if (region) {
-                    const regionCheckbox = document.getElementById(`region-${region}`);
-                    const regions = {
-                        'EUROPE': ['DE', 'FR', 'IT', 'ES', 'NL', 'BE', 'PL', 'CZ', 'MT', 'AT', 'CH', 'GB'],
-                        'APAC': ['AU', 'NZ', 'SG', 'HK', 'JP'],
-                        'NA': ['US', 'CA']
-                    };
-                    const allCountryCheckboxes = regions[region]
-                        .map(code => document.getElementById(`holiday-${code}`))
-                        .filter(cb => cb !== null);
-                    const allChecked = allCountryCheckboxes.every(cb => cb.checked);
-                    if (regionCheckbox) {
-                        regionCheckbox.checked = allChecked;
-                    }
+            }
+
+            // Handle country checkbox change
+            const countryCode = e.target.id.replace('holiday-', '');
+            const region = e.target.dataset.region;
+            
+            // Update region checkbox if needed
+            if (region) {
+                const regionCheckbox = document.getElementById(`region-${region}`);
+                const regions = {
+                    'EUROPE': ['DE', 'FR', 'IT', 'ES', 'NL', 'BE', 'PL', 'CZ', 'MT', 'AT', 'CH', 'GB'],
+                    'APAC': ['AU', 'NZ', 'SG', 'HK', 'JP'],
+                    'NA': ['US', 'CA']
+                };
+                const allCountryCheckboxes = regions[region]
+                    .map(code => document.getElementById(`holiday-${code}`))
+                    .filter(cb => cb !== null);
+                const allChecked = allCountryCheckboxes.every(cb => cb.checked);
+                if (regionCheckbox) {
+                    regionCheckbox.checked = allChecked;
                 }
             }
 
-            // Update all event dots and text displays
+            // Update all event displays
             document.querySelectorAll('.event-text').forEach(textElement => {
-                const dotDiv = textElement.querySelector('.event-dot');
-                if (dotDiv) {
-                    // This is a dot display - check if we need to convert to text
-                    const events = JSON.parse(dotDiv.dataset.events || '[]');
-                    const visibleEvents = events.filter(event => {
-                        const cb = document.getElementById(`holiday-${event.text}`);
-                        return cb && cb.checked;
-                    });
+                // Get the original events data
+                const originalEvents = JSON.parse(textElement.dataset.originalEvents || '[]');
+                
+                // Filter events based on checked checkboxes
+                const visibleEvents = originalEvents.filter(event => {
+                    const cb = document.getElementById(`holiday-${event.text}`);
+                    return cb && cb.checked;
+                });
 
-                    if (visibleEvents.length <= 2) {
-                        // Convert to text display
-                        dotDiv.style.display = 'none';
-                        
-                        // Create text display for remaining events
+                // Clear existing content
+                textElement.innerHTML = '';
+
+                // Add back visible events
+                if (visibleEvents.length > 0) {
+                    if (visibleEvents.length >= 3) {
+                        // Create new dot for 3+ events
+                        const newDotDiv = document.createElement('div');
+                        newDotDiv.className = 'event-dot';
+                        newDotDiv.dataset.events = JSON.stringify(visibleEvents);
+                        newDotDiv.title = visibleEvents.map(event => 
+                            `${event.text}: ${event.description}`
+                        ).join('\n');
+                        textElement.appendChild(newDotDiv);
+                    } else {
+                        // Show text for 1-2 events
                         visibleEvents.forEach((event, index) => {
                             const eventSpan = document.createElement('span');
                             eventSpan.textContent = event.text;
                             eventSpan.title = event.description;
                             eventSpan.className = 'event-item';
                             eventSpan.dataset.country = event.text;
-                            eventSpan.style.display = 'inline';
                             
                             if (index > 0) {
                                 const comma = document.createElement('span');
@@ -458,50 +470,8 @@ document.addEventListener('DOMContentLoaded', () => {
                             }
                             textElement.appendChild(eventSpan);
                         });
-                    } else {
-                        // Keep dot display, just update tooltip
-                        dotDiv.style.display = 'block';
-                        dotDiv.title = visibleEvents
-                            .map(event => `${event.text}: ${event.description}`)
-                            .join('\n');
-                            
-                        // Remove any existing text display
-                        Array.from(textElement.children)
-                            .filter(child => child !== dotDiv)
-                            .forEach(child => child.remove());
                     }
-                } else {
-                    // This is already a text display - update visibility
-                    const items = Array.from(textElement.children).filter(child => 
-                        child.classList && child.classList.contains('event-item')
-                    );
-                    
-                    items.forEach(item => {
-                        const itemCountry = item.dataset.country;
-                        const cb = document.getElementById(`holiday-${itemCountry}`);
-                        if (cb) {
-                            item.style.display = cb.checked ? 'inline' : 'none';
-                        }
-                    });
-
-                    // Update commas
-                    const commas = textElement.querySelectorAll('.event-comma');
-                    commas.forEach(comma => {
-                        const prevItem = comma.previousElementSibling;
-                        const nextItem = comma.nextElementSibling;
-                        if (prevItem && nextItem) {
-                            const prevVisible = prevItem.style.display !== 'none';
-                            const nextVisible = nextItem.style.display !== 'none';
-                            comma.style.display = (prevVisible && nextVisible) ? 'inline' : 'none';
-                        }
-                    });
                 }
-
-                // Check if anything is visible
-                const hasVisibleContent = Array.from(textElement.children).some(child => 
-                    child.style.display !== 'none'
-                );
-                textElement.style.display = hasVisibleContent ? 'block' : 'none';
             });
         }
     });
