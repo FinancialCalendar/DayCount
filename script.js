@@ -4,7 +4,13 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // Set date picker to today's date
     const today = new Date();
-    dateSelector.valueAsDate = today;
+    //dateSelector.valueAsDate = today;
+
+            // Format date for the date picker (yyyy-mm-dd)
+            const year = today.getFullYear();
+            const month = String(today.getMonth() + 1).padStart(2, '0'); // Month is 0-based
+            const day = String(today.getDate()).padStart(2, '0');
+            dateSelector.value = `${year}-${month}-${day}`; // Correct format for <input type="date">
     
     // Create and display initial calendar with selected date
     createCalendars(today);
