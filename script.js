@@ -5,14 +5,14 @@ document.addEventListener('DOMContentLoaded', () => {
     // Set date picker to today's date
     const today = new Date();
     //dateSelector.valueAsDate = today;
-
+    
             // Format date for the date picker (yyyy-mm-dd)
             const year = today.getFullYear();
             const month = String(today.getMonth() + 1).padStart(2, '0'); // Month is 0-based
             const day = String(today.getDate()).padStart(2, '0');
             dateSelector.value = `${year}-${month}-${day}`; // Correct format for <input type="date">
-    
-    // Create and display initial calendar with selected date
+
+    // Create and display initial calendar with today's date
     createCalendars(today);
     
     // Update calendar when date is changed
@@ -326,7 +326,7 @@ document.addEventListener('DOMContentLoaded', () => {
         // Group countries by region
         const regions = {
             'EUROPE': ['DE', 'FR', 'IT', 'ES', 'NL', 'BE', 'PL', 'CZ', 'MT', 'AT', 'CH', 'GB'],
-            'APAC': ['AU', 'NZ', 'SG', 'HK', 'JP'],
+            'APAC': ['AU', 'NZ', 'SG', 'HK', 'JP' , 'PH'],
             'NA': ['US', 'CA']
         };
 
@@ -400,7 +400,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const region = e.target.id.replace('region-', '');
                 const regions = {
                     'EUROPE': ['DE', 'FR', 'IT', 'ES', 'NL', 'BE', 'PL', 'CZ', 'MT', 'AT', 'CH', 'GB'],
-                    'APAC': ['AU', 'NZ', 'SG', 'HK', 'JP'],
+                    'APAC': ['AU', 'NZ', 'SG', 'HK', 'JP' , 'PH'],
                     'NA': ['US', 'CA']
                 };
                 
@@ -422,7 +422,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const regionCheckbox = document.getElementById(`region-${region}`);
                 const regions = {
                     'EUROPE': ['DE', 'FR', 'IT', 'ES', 'NL', 'BE', 'PL', 'CZ', 'MT', 'AT', 'CH', 'GB'],
-                    'APAC': ['AU', 'NZ', 'SG', 'HK', 'JP'],
+                    'APAC': ['AU', 'NZ', 'SG', 'HK', 'JP', 'PH'],
                     'NA': ['US', 'CA']
                 };
                 const allCountryCheckboxes = regions[region]
